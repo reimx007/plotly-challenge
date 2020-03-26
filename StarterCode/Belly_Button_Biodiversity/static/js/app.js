@@ -1,15 +1,53 @@
-const url = "https://api.spacexdata.com/v2/launchpads";
+function unpack(rows, index) {
+  return rows.map(function(row) {
+    return row[index];
+  });
+}
 
 // Fetch the JSON data and console log it
-d3.json("samples.json").then(function(data) {
-  console.log(data);
-});
+// d3.json("samples.json").then(function(data) {
+//   // return data;
+//   console.log(data);
+//   var names = data.names;
+//   console.log(names);
+//   var metadata = data.metadata;
+//   // console.log(metadata);
+//   var samples = data.samples;
+//   // console.log(samples);
+//   // console.log(samples[0].sample_values);
+// });
 
 function init() {
+  d3.json("samples.json").then(function(data) {
+    // return data;
+    var names = data.names;
+    console.log(names);
+    var metadata = data.metadata;
+    var samples = data.samples;
+    var sampleValues = samples[0].sample_values
+    var otuIDs = samples[0].otu_ids
+    var otuLabels - samples[0].otu_labels
+    var sortedV = sampleValues.sort((a, b) => b - a);
+    var sortedIDs = otuIDs.sort((a, b) => b - a);
+    var slicedV = sortedV.slice(0, 10);
+    var slicedIDs = sortedIDs.slice(0, 10);
+
+
+    var ele = document.getElementById('selDataset');
+    // var dropdownMenu = d3.select("#selDataset");
+    // var ele = dropdownMenu.property("value");
+    for (var i = 0; i < names.length; i++) {
+      console.log(names[1]);
+        // POPULATE SELECT ELEMENT WITH JSON.
+        ele.innerHTML = ele.innerHTML +
+            '<option value="' + names[i] + '">' + names[i] + '</option>';
+    }
+
+
   // Trace1 for the Greek Data
   var trace1 = {
-    x: [50,50,40,60,70,80,90,30,100,70],
-    y: ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"],
+    x: slicedV,
+    y: otuLabels,
     // text: reversedData.map(object => object.otu_labels ),
     name: "Greek",
     type: "bar",
@@ -26,7 +64,7 @@ function init() {
       b: 100
     }
   };
-  Plotly.newPlot("bar", data, layout);
+  // Plotly.newPlot("bar", data, layout);
 
   var trace2 = {
     x: [1, 2, 3, 4],
@@ -49,6 +87,7 @@ function init() {
   };
 
   Plotly.newPlot('bubble', data_bubble, layout_bubble);
+  });
   }
 
 // Call updatePlotly() when a change takes place to the DOM
