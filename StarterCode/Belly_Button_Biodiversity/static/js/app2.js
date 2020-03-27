@@ -1,62 +1,87 @@
-function DrawBarChart(sampleID)
+function DrawBubbleChart(sampleID)
 {
-  console.log(`Calling DrawBarChart(${sampleID})`)
+  console.log(`Calling DrawBubbleChart(${sampleID})`)
   d3.json("samples.json").then(function(data) {
     var sampleID_int = parseInt(sampleID);
     console.log(sampleID_int);
     var samples = data.samples;
-    // samples.forEach(sample => console.log(sample));
-    // console.log(samples);
-    var filteredData = samples.filter(sample => samples.id === sampleID_int);
-    console.log(filteredData);
+    var sampleArrays = [];
+    Object.entries(samples).forEach(([key, value]) => sampleArrays.push(value));
+    var samplesFiltered = sampleArrays.filter(sample => sample.id == sampleID_int);
+    console.log(samplesFiltered);
+    var selectedSample = samplesFiltered[0]
+    console.log(selectedSample);
+    var selectedItems = []
+    Object.entries(selectedSample).forEach(([key, value]) => selectedItems.push(value));
+    var otu_ids = selectedItems[1];
+    var sample_values = selectedItems[2];
+    var otu_labels = selectedItems[3];
+    console.log(`Coolio, we have our values.`);
 
-    // // Sort the data by Greek search results
-    // var sortedSampleValues = data.sort((a, b) => b.name.sample_values  - a.name.sample_values );
-    // // Slice the first 10 objects for plotting
-    // slicedData = sortedSampleValues.slice(0, 10);
-    // reversedData = slicedData.reverse();
-    //
-    // var trace1 = {
-    //   x: reversedData.map(object => object.name.sample_values),
-    //   y: reversedData.map(object => object.name.otu_ids ),
-    //   text: reversedData.map(object => object.name.otu_labels ),
-    //   // text: reversedData.map(object => object.otu_labels ),
-    //   name: "Samples",
-    //   type: "bar",
-    //   orientation: "h"
-    // };
-  // Trace1 for the Greek Data
-  // var trace1 = {
-  //   x: slicedV,
-  //   y: otuLabels,
-  //   // text: reversedData.map(object => object.otu_labels ),
-  //   name: "Greek",
-  //   type: "bar",
-  //   orientation: "h"
-  // };
-  // var data = [trace1];
-  // // Apply the group bar mode to the layout
-  // var layout = {
-  //   title: "Sample values",
-  //   margin: {
-  //     l: 100,
-  //     r: 100,
-  //     t: 100,
-  //     b: 100
-  //   }
-  // };
-  // Plotly.newPlot("bar", data, layout);
+    var trace2 = {
+      x: otu_ids,
+      y: sample_values,
+      text: otu_labels,
+      mode: 'markers',
+      marker: {
+        color: otu_ids,
+        size: [40, 60, 80, 100]
+        }
+    };
+
+    var data_bubble = [trace2];
+
+    var layout_bubble = {
+      title: `Bubble Chart for subject: ${sampleID_int}`,
+      xaxis: { title: "OTU IDs" },
+      yaxis: { title: "Sample Values"},
+      showlegend: false,
+      height: 600,
+      width: 1000
+    };
+
+    Plotly.newPlot('bubble', data_bubble, layout_bubble);
 });
 }
 
-function DrawBubblechart(sampleID)
+function DrawBarChart(sampleID)
 {
-  console.log(`Calling DrawBubblechart(${sampleID})`)
+  console.log(`Calling DrawBarchart(${sampleID})`);
+
+  d3.json("samples.json").then((data) => {
+    var sampleID_int = parseInt(sampleID);
+    var samples = data.samples;
+    var resultArray = samples.filter(s => s.id === sampleID);
+    var result = resultArray[0];
+    var otu_ids = result.otu_ids;
+    var otu_labels = result.otu_labels;
+    var sample_values = result.sample_values;
+
+    yticks = otu_ids.slice(0, 10).map(otuID => `OTU ${otuID}`).reverse();
+
+    var barData = [{
+      x: sample_values.slice(0, 10).reverse(),
+      y: yticks,
+      type: "bar",
+      text: otu_labels.slice(0,10).reverse(),
+      orientation: "h"
+    }];
+
+    var layout = {
+      title: `Sample Values fort: ${sampleID_int}`,
+      margin: {
+        l: 80,
+        t: 30,
+        b: 30
+      }
+    };
+    Plotly.newPlot("bar", barData, layout);
+  });
 }
 
 function ShowMetadata(sampleID)
 {
-  console.log(`Calling ShowMetadata(${sampleID})`)
+  console.log(`Calling ShowMetadata(${sampleID})`);
   d3.json("samples.json").then(function(data) {
     var sampleID_int = parseInt(sampleID);
     // console.log(sampleID_int);
@@ -65,10 +90,11 @@ function ShowMetadata(sampleID)
     var filteredData = metadata.filter(person => person.id === sampleID_int);
     // console.log(filteredData)
     var metadataValues = [];
+
     Object.entries(filteredData[0]).forEach(([key, value]) => metadataValues.push(value));
-    console.log(`Metadata values for ${sampleID}: ${metadataValues}`);
+    console.log(`Values for ${sampleID}: ${metadataValues}`);
     // Use chaining to create a new element and set its text
-    var id_p = d3.select("#sample-metadata").append("p").text(`ID: ${metadataValues[0]}`);
+    var id_p = d3.select("#sample-metadata").html("").append("p").text(`ID: ${metadataValues[0]}`);
     var eth_p = d3.select("#sample-metadata").append("p").text(`Ethnicity: ${metadataValues[1]}`);
     var gen_p = d3.select("#sample-metadata").append("p").text(`Gender: ${metadataValues[2]}`);
     var age_p = d3.select("#sample-metadata").append("p").text(`Age: ${metadataValues[3]}`);
@@ -82,9 +108,10 @@ function optionChanged(newSampleID)
 {
   console.log(`User selected ${newSampleID}`)
 
-  DrawBubblechart(newSampleID);
+  DrawBubbleChart(newSampleID);
   DrawBarChart(newSampleID);
   ShowMetadata(newSampleID);
+
 }
 
 
@@ -103,6 +130,11 @@ function InitDashboard()
           .text(sampleId)
           .property("value", sampleId);
       });
+
+      // var sampleID = names[0];
+      //
+      // DrawBubbleChart(sampleID);
+      // ShowMetadata(sampleID);
 
     });
 }
