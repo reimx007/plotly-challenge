@@ -1,178 +1,196 @@
-function unpack(rows, index) {
-  return rows.map(function(row) {
-    return row[index];
-  });
-}
-
-// Fetch the JSON data and console log it
-// d3.json("samples.json").then(function(data) {
-//   // return data;
-//   console.log(data);
-//   var names = data.names;
-//   console.log(names);
-//   var metadata = data.metadata;
-//   // console.log(metadata);
-//   var samples = data.samples;
-//   // console.log(samples);
-//   // console.log(samples[0].sample_values);
-// });
-
-function init() {
+function DrawBubbleChart(sampleID)
+{
+  console.log(`Calling DrawBubbleChart(${sampleID})`)
   d3.json("samples.json").then(function(data) {
-    // return data;
-    var names = data.names;
-    console.log(names);
-    var metadata = data.metadata;
+    var sampleID_int = parseInt(sampleID);
+    console.log(sampleID_int);
     var samples = data.samples;
-    var sampleValues = samples[0].sample_values
-    var otuIDs = samples[0].otu_ids
-    var otuLabels - samples[0].otu_labels
-    var sortedV = sampleValues.sort((a, b) => b - a);
-    var sortedIDs = otuIDs.sort((a, b) => b - a);
-    var slicedV = sortedV.slice(0, 10);
-    var slicedIDs = sortedIDs.slice(0, 10);
+    var sampleArrays = [];
+    Object.entries(samples).forEach(([key, value]) => sampleArrays.push(value));
+    var samplesFiltered = sampleArrays.filter(sample => sample.id == sampleID_int);
+    console.log(samplesFiltered);
+    var selectedSample = samplesFiltered[0]
+    console.log(selectedSample);
+    var selectedItems = []
+    Object.entries(selectedSample).forEach(([key, value]) => selectedItems.push(value));
+    var otu_ids = selectedItems[1];
+    var sample_values = selectedItems[2];
+    var otu_labels = selectedItems[3];
+    console.log(`Coolio, we have our values.`);
 
+    var trace2 = {
+      x: otu_ids,
+      y: sample_values,
+      text: otu_labels,
+      mode: 'markers',
+      marker: {
+        color: otu_ids,
+        size: [40, 60, 80, 100]
+        }
+    };
 
-    var ele = document.getElementById('selDataset');
-    // var dropdownMenu = d3.select("#selDataset");
-    // var ele = dropdownMenu.property("value");
-    for (var i = 0; i < names.length; i++) {
-      console.log(names[1]);
-        // POPULATE SELECT ELEMENT WITH JSON.
-        ele.innerHTML = ele.innerHTML +
-            '<option value="' + names[i] + '">' + names[i] + '</option>';
-    }
+    var data_bubble = [trace2];
 
+    var layout_bubble = {
+      title: `Bubble Chart for subject: ${sampleID_int}`,
+      xaxis: { title: "OTU IDs" },
+      yaxis: { title: "Sample Values"},
+      showlegend: false,
+      height: 600,
+      width: 1000
+    };
 
-  // Trace1 for the Greek Data
-  var trace1 = {
-    x: slicedV,
-    y: otuLabels,
-    // text: reversedData.map(object => object.otu_labels ),
-    name: "Greek",
-    type: "bar",
-    orientation: "h"
-  };
-  var data = [trace1];
-  // Apply the group bar mode to the layout
-  var layout = {
-    title: "Sample values",
-    margin: {
-      l: 100,
-      r: 100,
-      t: 100,
-      b: 100
-    }
-  };
-  // Plotly.newPlot("bar", data, layout);
-
-  var trace2 = {
-    x: [1, 2, 3, 4],
-    y: [10, 11, 12, 13],
-    text: ['A<br>size: 40', 'B<br>size: 60', 'C<br>size: 80', 'D<br>size: 100'],
-    mode: 'markers',
-    marker: {
-      color: ['rgb(93, 164, 214)', 'rgb(255, 144, 14)',  'rgb(44, 160, 101)', 'rgb(255, 65, 54)'],
-      size: [40, 60, 80, 100]
-      }
-  };
-
-  var data_bubble = [trace2];
-
-  var layout_bubble = {
-    title: 'Bubble Chart of Samples',
-    showlegend: false,
-    height: 600,
-    width: 600
-  };
-
-  Plotly.newPlot('bubble', data_bubble, layout_bubble);
-  });
-  }
-
-// Call updatePlotly() when a change takes place to the DOM
-d3.selectAll("#selDataset").on("change", updatePlotly);
-
-// This function is called when a dropdown menu item is selected
-function updatePlotly() {
-  // Use D3 to select the dropdown menu
-  var dropdownMenu = d3.select("#selDataset");
-  // Assign the value of the dropdown menu option to a variable
-  var name = dropdownMenu.property("value");
-
-  // Sort the data by Greek search results
-  var sortedSampleValues = data.sort((a, b) => b.name.sample_values  - a.name.sample_values );
-  // Slice the first 10 objects for plotting
-  slicedData = sortedSampleValues.slice(0, 10);
-  reversedData = slicedData.reverse();
-
-  var trace1 = {
-    x: reversedData.map(object => object.name.sample_values),
-    y: reversedData.map(object => object.name.otu_ids ),
-    text: reversedData.map(object => object.name.otu_labels ),
-    // text: reversedData.map(object => object.otu_labels ),
-    name: "Samples",
-    type: "bar",
-    orientation: "h"
-  };
-  var data = [trace1];
-  // Apply the group bar mode to the layout
-  var layout = {
-    title: "Sample values",
-    margin: {
-      l: 100,
-      r: 100,
-      t: 100,
-      b: 100
-    }
-  };
-
-  // Render the plot to the div tag with id "bar"
-  Plotly.restyle("bar", "layout", [layout]);
-  Plotly.restyle("bar", "data", [data]);
-
-  var sample = name.sample_values
-
-  var trace2 = {
-    x: sample.map(object => object.otu_ids),
-    y: sample.map(object => object.sample_values),
-    text: sample.map(object => object.otu_labels),
-    mode: 'markers',
-    marker: {
-      color: sample.map(object => object.otu_ids),
-      size: sample.map(object => object.sample_values)
-      }
-  };
-
-  var data_bubble = [trace1];
-
-  var layout_bubble = {
-    title: 'Bubble Chart of Samples',
-    showlegend: false,
-    height: 600,
-    width: 600
-  };
-
-  Plotly.restyle("bubble", "layout", [layout_bubble]);
-  Plotly.restyle("bubble", "data", [data_bubble]);
-
-  // // Initialize x and y arrays
-  // var x = [];
-  // var y = [];
-  //
-  // if (dataset === 'dataset1') {
-  //   x = [1, 2, 3, 4, 5];
-  //   y = [1, 2, 4, 8, 16];
-  // }
-  //
-  // if (dataset === 'dataset2') {
-  //   x = [10, 20, 30, 40, 50];
-  //   y = [1, 10, 100, 1000, 10000];
-  // }
-  //
-  // // Note the extra brackets around 'x' and 'y'
-  // Plotly.restyle("plot", "x", [x]);
-  // Plotly.restyle("plot", "y", [y]);
+    Plotly.newPlot('bubble', data_bubble, layout_bubble);
+});
 }
 
-init();
+function DrawBarChart(sampleID)
+{
+  console.log(`Calling DrawBarchart(${sampleID})`);
+
+  d3.json("samples.json").then((data) => {
+    var sampleID_int = parseInt(sampleID);
+    var samples = data.samples;
+    var resultArray = samples.filter(s => s.id === sampleID);
+    var result = resultArray[0];
+    var otu_ids = result.otu_ids;
+    var otu_labels = result.otu_labels;
+    var sample_values = result.sample_values;
+
+    yticks = otu_ids.slice(0, 10).map(otuID => `OTU ${otuID}`).reverse();
+
+    var barData = [{
+      x: sample_values.slice(0, 10).reverse(),
+      y: yticks,
+      type: "bar",
+      text: otu_labels.slice(0,10).reverse(),
+      orientation: "h"
+    }];
+
+    var layout = {
+      title: `Sample Values fort: ${sampleID_int}`,
+      margin: {
+        l: 80,
+        t: 30,
+        b: 30
+      }
+    };
+    Plotly.newPlot("bar", barData, layout);
+  });
+}
+
+function DrawGauge(sampleID)
+{
+  console.log(`Calling DrawGauge(${sampleID})`);
+  d3.json("samples.json").then(function(data) {
+    var sampleID_int = parseInt(sampleID);
+    // console.log(sampleID_int);
+    var metadata = data.metadata;
+    // console.log(metadata);
+    var filteredData = metadata.filter(person => person.id === sampleID_int);
+    // console.log(filteredData)
+    var metadataValues = [];
+
+    Object.entries(filteredData[0]).forEach(([key, value]) => metadataValues.push(value));
+    console.log(`wfreq: ${metadataValues[6]}`);
+
+    var data = [
+  {
+    domain: { x: [0, 1], y: [0, 1] },
+    value: metadataValues[6],
+    title: { text: "Washing frequency per week" },
+    type: "indicator",
+    mode: "gauge+number",
+    // delta: { reference: 380 },
+    gauge: {
+      axis: {
+        range: [null, 9],
+        tickmode: "array",
+        tickvals: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        ticktext: ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+       },
+      steps: [
+        { range: [0, 1], color: "#A3C1AD" },
+        { range: [1, 2], color: "#A3C1AD" },
+        { range: [2, 3], color: "#A3C1AD" },
+        { range: [3, 4], color: "#A3C1AD" },
+        { range: [4, 5], color: "#A3C1AD" },
+        { range: [5, 6], color: "#A3C1AD" },
+        { range: [6, 7], color: "#A3C1AD" },
+        { range: [7, 8], color: "#A3C1AD" },
+        { range: [8, 9], color: "#A3C1AD" }
+      ],
+    }
+  }
+];
+
+var layout = { width: 600, height: 450, margin: { t: 0, b: 0 } };
+Plotly.newPlot('gauge', data, layout);
+
+});
+}
+
+function ShowMetadata(sampleID)
+{
+  console.log(`Calling ShowMetadata(${sampleID})`);
+  d3.json("samples.json").then(function(data) {
+    var sampleID_int = parseInt(sampleID);
+    // console.log(sampleID_int);
+    var metadata = data.metadata;
+    // console.log(metadata);
+    var filteredData = metadata.filter(person => person.id === sampleID_int);
+    // console.log(filteredData)
+    var metadataValues = [];
+
+    Object.entries(filteredData[0]).forEach(([key, value]) => metadataValues.push(value));
+    console.log(`Values for ${sampleID}: ${metadataValues}`);
+    // Use chaining to create a new element and set its text
+    var id_p = d3.select("#sample-metadata").html("").append("p").text(`ID: ${metadataValues[0]}`);
+    var eth_p = d3.select("#sample-metadata").append("p").text(`Ethnicity: ${metadataValues[1]}`);
+    var gen_p = d3.select("#sample-metadata").append("p").text(`Gender: ${metadataValues[2]}`);
+    var age_p = d3.select("#sample-metadata").append("p").text(`Age: ${metadataValues[3]}`);
+    var location_p = d3.select("#sample-metadata").append("p").text(`Location: ${metadataValues[4]}`);
+    var bbtype_p = d3.select("#sample-metadata").append("p").text(`bbtype: ${metadataValues[5]}`);
+    var wfreq_p = d3.select("#sample-metadata").append("p").text(`wfreq: ${metadataValues[6]}`);
+});
+}
+
+function optionChanged(newSampleID)
+{
+  console.log(`User selected ${newSampleID}`)
+
+  DrawBubbleChart(newSampleID);
+  DrawBarChart(newSampleID);
+  DrawGauge(newSampleID);
+  ShowMetadata(newSampleID);
+
+}
+
+
+function InitDashboard()
+{
+    console.log("Initializing Dashboard");
+
+    var selector = d3.select("#selDataset");
+
+    d3.json("samples.json").then(function(data) {
+      console.log(data);
+
+      var names = data.names;
+      names.forEach((sampleId) => {
+        selector.append("option")
+          .text(sampleId)
+          .property("value", sampleId);
+      });
+
+      var sampleID = names[0];
+
+      DrawBubbleChart(sampleID);
+      DrawBarChart(sampleID);
+      DrawGauge(sampleID);
+      ShowMetadata(sampleID);
+
+    });
+}
+
+InitDashboard();
