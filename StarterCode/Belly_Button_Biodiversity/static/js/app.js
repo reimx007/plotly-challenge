@@ -1,7 +1,8 @@
 function DrawBubbleChart(sampleID)
 {
   console.log(`Calling DrawBubbleChart(${sampleID})`)
-  d3.json("samples.json").then(function(data) {
+  // d3.json("samples.json").then(function(data) {
+  d3.json("././samples.json").then(function(data) {
     var sampleID_int = parseInt(sampleID);
     console.log(sampleID_int);
     var samples = data.samples;
@@ -48,7 +49,7 @@ function DrawBarChart(sampleID)
 {
   console.log(`Calling DrawBarchart(${sampleID})`);
 
-  d3.json("samples.json").then((data) => {
+  d3.json("././samples.json").then((data) => {
     var sampleID_int = parseInt(sampleID);
     var samples = data.samples;
     var resultArray = samples.filter(s => s.id === sampleID);
@@ -82,7 +83,7 @@ function DrawBarChart(sampleID)
 function DrawGauge(sampleID)
 {
   console.log(`Calling DrawGauge(${sampleID})`);
-  d3.json("samples.json").then(function(data) {
+  d3.json("././samples.json").then(function(data) {
     var sampleID_int = parseInt(sampleID);
     // console.log(sampleID_int);
     var metadata = data.metadata;
@@ -133,7 +134,7 @@ Plotly.newPlot('gauge', data, layout);
 function ShowMetadata(sampleID)
 {
   console.log(`Calling ShowMetadata(${sampleID})`);
-  d3.json("samples.json").then(function(data) {
+  d3.json("././samples.json").then(function(data) {
     var sampleID_int = parseInt(sampleID);
     // console.log(sampleID_int);
     var metadata = data.metadata;
@@ -173,7 +174,7 @@ function InitDashboard()
 
     var selector = d3.select("#selDataset");
 
-    d3.json("samples.json").then(function(data) {
+    d3.json("././samples.json").then(function(data) {
       console.log(data);
 
       var names = data.names;
